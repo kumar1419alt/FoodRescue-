@@ -1,10 +1,12 @@
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 
 import { getTestDatabaseUrl } from "./test-database";
 
 const databaseUrl = getTestDatabaseUrl();
-const command = process.platform === "win32" ? "npx.cmd" : "npx";
-const result = spawnSync(command, ["prisma", "migrate", "deploy"], {
+const require = createRequire(import.meta.url);
+const prismaCli = require.resolve("prisma/build/index.js");
+const result = spawnSync(process.execPath, [prismaCli, "migrate", "deploy"], {
   env: { ...process.env, DATABASE_URL: databaseUrl },
   stdio: "inherit",
 });

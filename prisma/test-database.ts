@@ -1,3 +1,7 @@
+import { config } from "dotenv";
+
+config({ path: ".env.local", quiet: true });
+
 function normalizeConnectionString(connectionString: string) {
   const url = new URL(connectionString);
   url.username = "";
