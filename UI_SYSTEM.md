@@ -20,3 +20,7 @@ The dashboard preview is explicitly non-operational. Future authenticated role i
 ## Accessibility
 
 Controls have visible focus rings, native labels, semantic sections, keyboard-capable Radix primitives, and reduced-motion support. Error and loading states have text/roles rather than color alone. Maintain the light theme as the production baseline; a dark theme must be designed and tested as a separate enhancement.
+
+## Phase 2 validation
+
+Focused Vitest interaction coverage verifies pagination bounds and navigation contracts, confirmation-dialog cancel/Escape/success/failure behavior, and mobile navigation open/close behavior. Type checking, linting, production build, and whitespace checks are also required. Browser viewport inspection at 375px, 768px, and 1440px remains a manual follow-up: the Codex browser surface cannot connect to the local development server, so no browser-based viewport result is claimed here.
