@@ -180,7 +180,7 @@ model AuthSession {
 model AuthVerification {
   id         String   @id @default(cuid())
   identifier String
-  value      String   @unique
+  value      String
   expiresAt  DateTime @db.Timestamptz(6)
   createdAt  DateTime @default(now()) @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @db.Timestamptz(6)

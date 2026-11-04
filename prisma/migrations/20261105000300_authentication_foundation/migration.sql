@@ -50,7 +50,6 @@ CREATE INDEX "AuthAccount_userId_idx" ON "AuthAccount"("userId");
 CREATE UNIQUE INDEX "AuthSession_token_key" ON "AuthSession"("token");
 CREATE INDEX "AuthSession_userId_expiresAt_idx" ON "AuthSession"("userId", "expiresAt");
 CREATE INDEX "AuthSession_expiresAt_idx" ON "AuthSession"("expiresAt");
-CREATE UNIQUE INDEX "AuthVerification_value_key" ON "AuthVerification"("value");
 CREATE INDEX "AuthVerification_identifier_expiresAt_idx" ON "AuthVerification"("identifier", "expiresAt");
 
 ALTER TABLE "AuthAccount"

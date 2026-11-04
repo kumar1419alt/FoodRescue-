@@ -6,6 +6,7 @@ import { nextCookies } from "better-auth/next-js";
 
 import { env } from "@/lib/config/env";
 import { prisma } from "@/lib/data-access/prisma";
+import { deliverAuthenticationEmail } from "@/lib/auth/email";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -50,6 +51,32 @@ export const auth = betterAuth({
     minPasswordLength: 12,
     maxPasswordLength: 128,
     revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ url }) =>
+      deliverAuthenticationEmail({
+        subject: "Reset your FoodRescue password",
+        url,
+      }),
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendOnSignIn: true,
+    expiresIn: 60 * 60,
+    sendVerificationEmail: async ({ url }) =>
+      deliverAuthenticationEmail({
+        subject: "Verify your FoodRescue email",
+        url,
+      }),
+  },
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 10,
+    customRules: {
+      "/sign-in/email": { window: 60, max: 5 },
+      "/sign-up/email": { window: 60 * 60, max: 5 },
+      "/request-password-reset": { window: 60 * 60, max: 5 },
+      "/send-verification-email": { window: 60 * 60, max: 5 },
+    },
   },
   advanced: {
     database: {

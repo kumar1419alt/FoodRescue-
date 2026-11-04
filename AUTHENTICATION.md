@@ -54,6 +54,10 @@ Copy `.env.example` to `.env.local` and configure only local secrets:
   one with `openssl rand -base64 32`.
 - `BETTER_AUTH_URL`: canonical application origin, normally
   `http://localhost:3000` during local development.
+- `FOODRESCUE_DEV_EMAIL_TRANSPORT=console`: an explicit local-only option that
+  prints a verification or reset URL to the local server console. It must never
+  be enabled in production. Without a configured transport, delivery remains
+  pending and no account is verified automatically.
 - `DATABASE_URL` and `DATABASE_TEST_URL`: existing, separate PostgreSQL URLs.
 
 Never commit `.env.local`. Production uses HTTPS and secure cookies. Secrets
@@ -79,14 +83,17 @@ or direct destructive migration commands against the development database.
 - Production refuses to start without `BETTER_AUTH_SECRET` or `AUTH_SECRET`.
 - Sessions expire after seven days and are refreshed at most once per day.
 - Password resets revoke other active sessions.
-- Authentication authorization will use server-derived identities and a
-  deny-by-default data-access policy.
+- Protected routes resolve identities server-side from the database session and
+  use deny-by-default authorization helpers. Dashboard access also validates
+  the active user and the expected global role.
 - Verification and reset delivery require a configured transport; no delivery
   configuration may mark a user verified automatically.
 
-## Current implementation status
+## Phase 4 implementation status
 
-The database and framework route foundation is in place. Registration pages,
-authorization helpers, mail delivery, admin provisioning, and authentication
-test coverage are implemented in the subsequent Phase 4 stages. Database
-application is presently blocked until the local PostgreSQL service is running.
+The public registration, sign-in, sign-out, verification notice, password
+reset, protected profile, security, and role-aware dashboard entry routes are
+implemented. NGO self-registration creates a pending NGO organization and
+membership; it does not approve the organization. Admin accounts are never
+created through public registration and must be provisioned through a future
+audited administrative workflow.
