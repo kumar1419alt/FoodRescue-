@@ -1,0 +1,28 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# Next.js build output
+/.next
+/out
+/build
+
+# tests and coverage
+/coverage
+
+# local environment and secrets
+.env
+.env.*
+!.env.example
+
+# logs and local tooling
+*.log
+.DS_Store
+*.tsbuildinfo
+
+# deployment and editor files
+.vercel
+.idea
+.vscode/*
+!.vscode/extensions.json
