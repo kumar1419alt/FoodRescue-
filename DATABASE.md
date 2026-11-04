@@ -45,16 +45,17 @@ The compose file has a persistent named volume and a `pg_isready` health check. 
 | `npm run db:generate` | Generate the local Prisma Client. |
 | `npm run db:migrate` | Create/apply a development migration; requires `DATABASE_URL`. |
 | `npm run db:deploy` | Apply committed migrations in a deployment environment. |
+| `npm run db:test:migrate` | Apply committed migrations only to the guarded `DATABASE_TEST_URL` database. |
 | `npm run db:seed` | Insert only repeatable, fictional development data. Disabled in production. |
 | `npm run test:db` | Run integration tests against `DATABASE_TEST_URL`; migrate that test database first. |
 
-The initial migration is checked in under `prisma/migrations`. Do not edit migration history after it has been applied to a shared database. Create a new migration for each intentional schema change.
+To prepare the test database, run `npm run db:test:migrate` before `npm run test:db`. Both commands require `DATABASE_TEST_URL`, require its database name to end in `_test`, and reject an identical `DATABASE_URL`. The initial migration is checked in under `prisma/migrations`. Do not edit migration history after it has been applied to a shared database. Create a new migration for each intentional schema change.
 
 ## Data model and integrity
 
 The normalized schema covers users and organization memberships; organization verification; donor pickup locations; donations and NGO matching; volunteer assignments; inspections; transport; custody history; NGO receipts; NGO-managed beneficiary groups; distributions; notifications; and audit logs. Beneficiaries have no individual identity records.
 
-Lifecycle state is represented by PostgreSQL enums aligned with `types/donation.ts`. Timestamps use `timestamptz`; quantities that need precision use PostgreSQL `numeric`. Foreign keys, uniqueness rules, indexes, and restrictive delete rules protect operational records. Audit and custody history are deliberately not cascade-deleted.
+Lifecycle state is represented by PostgreSQL enums aligned with `types/donation.ts`. Timestamps use `timestamptz`; quantities that need precision use PostgreSQL `numeric`. Foreign keys, uniqueness rules, indexes, and restrictive delete rules protect operational records. Donation matches, volunteer assignments, inspections, transport, custody, receipts, and distributions prevent donation deletion rather than silently cascading away history. Audit and custody history are deliberately not cascade-deleted.
 
 Database constraints protect structural integrity. Future service-layer commands must authorize the acting user and perform donation status changes, custody events, and audit entries in one Prisma transaction to protect against concurrent updates.
 

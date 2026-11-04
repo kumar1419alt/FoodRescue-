@@ -236,7 +236,7 @@ model DonationMatch {
   respondedAt  DateTime?    @db.Timestamptz(6)
   responseNote String?
   createdAt    DateTime     @default(now()) @db.Timestamptz(6)
-  donation     Donation     @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  donation     Donation     @relation(fields: [donationId], references: [id], onDelete: Restrict)
   ngo          Organization @relation("MatchedNgo", fields: [ngoId], references: [id], onDelete: Restrict)
 
   @@unique([donationId, ngoId])
@@ -252,7 +252,7 @@ model VolunteerAssignment {
   acceptedAt  DateTime?        @db.Timestamptz(6)
   completedAt DateTime?        @db.Timestamptz(6)
   notes       String?
-  donation    Donation         @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  donation    Donation         @relation(fields: [donationId], references: [id], onDelete: Restrict)
   volunteer   User             @relation("AssignedVolunteer", fields: [volunteerId], references: [id], onDelete: Restrict)
   transports  Transport[]
 
@@ -269,7 +269,7 @@ model FoodSafetyInspection {
   notes        String?
   inspectedAt  DateTime?         @db.Timestamptz(6)
   createdAt    DateTime          @default(now()) @db.Timestamptz(6)
-  donation     Donation          @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  donation     Donation          @relation(fields: [donationId], references: [id], onDelete: Restrict)
   inspector    User              @relation("Inspector", fields: [inspectorId], references: [id], onDelete: Restrict)
 
   @@index([donationId, outcome])
@@ -287,7 +287,7 @@ model Transport {
   deliveryNotes String?
   createdAt     DateTime             @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime             @updatedAt @db.Timestamptz(6)
-  donation      Donation             @relation(fields: [donationId], references: [id], onDelete: Cascade)
+  donation      Donation             @relation(fields: [donationId], references: [id], onDelete: Restrict)
   assignment    VolunteerAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
 
   @@index([donationId, status])
