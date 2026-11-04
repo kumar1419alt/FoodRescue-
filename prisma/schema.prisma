@@ -1,0 +1,379 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  donor
+  ngo
+  volunteer
+  admin
+}
+
+enum OrganizationType {
+  restaurant
+  hotel
+  event_organizer
+  marriage_hall
+  household
+  ngo
+}
+
+enum VerificationStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum FoodCategory {
+  prepared_meal
+  produce
+  bakery
+  packaged_food
+  beverage
+  other
+}
+
+enum DonationStatus {
+  draft
+  submitted
+  matched
+  accepted
+  volunteer_assigned
+  safety_verified
+  picked_up
+  delivered
+  receipted
+  distributed
+  cancelled
+  expired
+  rejected
+}
+
+enum MatchStatus {
+  proposed
+  accepted
+  declined
+  expired
+  withdrawn
+}
+
+enum AssignmentStatus {
+  assigned
+  accepted
+  declined
+  in_progress
+  completed
+  cancelled
+}
+
+enum InspectionOutcome {
+  pending
+  passed
+  failed
+  conditional
+}
+
+enum TransportStatus {
+  scheduled
+  picked_up
+  delivered
+  cancelled
+}
+
+enum CustodyEventType {
+  created
+  matched
+  accepted
+  assigned
+  inspected
+  picked_up
+  delivered
+  receipted
+  distributed
+  cancelled
+  expired
+  rejected
+}
+
+enum NotificationChannel {
+  in_app
+  email
+  sms
+}
+
+enum NotificationStatus {
+  pending
+  sent
+  failed
+  read
+}
+
+model User {
+  id            String                 @id @default(cuid())
+  email         String                 @unique
+  displayName   String
+  phone         String?                @unique
+  role          UserRole
+  isActive      Boolean                @default(true)
+  createdAt     DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime               @updatedAt @db.Timestamptz(6)
+  memberships   OrganizationMember[]
+  assignments   VolunteerAssignment[]  @relation("AssignedVolunteer")
+  inspections   FoodSafetyInspection[] @relation("Inspector")
+  custodyEvents CustodyEvent[]         @relation("CustodyActor")
+  notifications Notification[]
+  auditLogs     AuditLog[]             @relation("AuditActor")
+}
+
+model Organization {
+  id                String               @id @default(cuid())
+  name              String
+  slug              String               @unique
+  type              OrganizationType
+  contactEmail      String?
+  contactPhone      String?
+  verification      Verification?
+  createdAt         DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime             @updatedAt @db.Timestamptz(6)
+  members           OrganizationMember[]
+  locations         DonorLocation[]
+  donorDonations    Donation[]           @relation("DonorOrganization")
+  ngoMatches        DonationMatch[]      @relation("MatchedNgo")
+  ngoReceipts       NgoReceipt[]
+  beneficiaryGroups BeneficiaryGroup[]
+
+  @@index([type])
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  role           UserRole
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+model Verification {
+  id             String             @id @default(cuid())
+  organizationId String             @unique
+  status         VerificationStatus @default(pending)
+  notes          String?
+  reviewedAt     DateTime?          @db.Timestamptz(6)
+  createdAt      DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime           @updatedAt @db.Timestamptz(6)
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model DonorLocation {
+  id             String       @id @default(cuid())
+  organizationId String
+  label          String
+  addressLine1   String
+  addressLine2   String?
+  city           String
+  state          String?
+  postalCode     String?
+  countryCode    String       @db.Char(2)
+  latitude       Decimal?     @db.Decimal(9, 6)
+  longitude      Decimal?     @db.Decimal(9, 6)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  donations      Donation[]
+
+  @@index([organizationId, isActive])
+}
+
+model Donation {
+  id                  String                 @id @default(cuid())
+  donorOrganizationId String
+  pickupLocationId    String
+  title               String
+  description         String?
+  foodCategory        FoodCategory
+  estimatedServings   Int
+  estimatedWeightKg   Decimal?               @db.Decimal(10, 2)
+  preparedAt          DateTime               @db.Timestamptz(6)
+  expiresAt           DateTime?              @db.Timestamptz(6)
+  pickupBy            DateTime               @db.Timestamptz(6)
+  status              DonationStatus         @default(draft)
+  createdAt           DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt           DateTime               @updatedAt @db.Timestamptz(6)
+  donorOrganization   Organization           @relation("DonorOrganization", fields: [donorOrganizationId], references: [id], onDelete: Restrict)
+  pickupLocation      DonorLocation          @relation(fields: [pickupLocationId], references: [id], onDelete: Restrict)
+  matches             DonationMatch[]
+  assignments         VolunteerAssignment[]
+  inspections         FoodSafetyInspection[]
+  transports          Transport[]
+  custodyEvents       CustodyEvent[]
+  receipt             NgoReceipt?
+  distributions       Distribution[]
+
+  @@index([donorOrganizationId, status])
+  @@index([status, pickupBy])
+  @@index([pickupLocationId])
+}
+
+model DonationMatch {
+  id           String       @id @default(cuid())
+  donationId   String
+  ngoId        String
+  status       MatchStatus  @default(proposed)
+  respondedAt  DateTime?    @db.Timestamptz(6)
+  responseNote String?
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  donation     Donation     @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  ngo          Organization @relation("MatchedNgo", fields: [ngoId], references: [id], onDelete: Restrict)
+
+  @@unique([donationId, ngoId])
+  @@index([ngoId, status])
+}
+
+model VolunteerAssignment {
+  id          String           @id @default(cuid())
+  donationId  String
+  volunteerId String
+  status      AssignmentStatus @default(assigned)
+  assignedAt  DateTime         @default(now()) @db.Timestamptz(6)
+  acceptedAt  DateTime?        @db.Timestamptz(6)
+  completedAt DateTime?        @db.Timestamptz(6)
+  notes       String?
+  donation    Donation         @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  volunteer   User             @relation("AssignedVolunteer", fields: [volunteerId], references: [id], onDelete: Restrict)
+  transports  Transport[]
+
+  @@index([volunteerId, status])
+  @@index([donationId, status])
+}
+
+model FoodSafetyInspection {
+  id           String            @id @default(cuid())
+  donationId   String
+  inspectorId  String
+  outcome      InspectionOutcome @default(pending)
+  temperatureC Decimal?          @db.Decimal(5, 2)
+  notes        String?
+  inspectedAt  DateTime?         @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @db.Timestamptz(6)
+  donation     Donation          @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  inspector    User              @relation("Inspector", fields: [inspectorId], references: [id], onDelete: Restrict)
+
+  @@index([donationId, outcome])
+}
+
+model Transport {
+  id            String               @id @default(cuid())
+  donationId    String
+  assignmentId  String?
+  status        TransportStatus      @default(scheduled)
+  scheduledFor  DateTime?            @db.Timestamptz(6)
+  pickedUpAt    DateTime?            @db.Timestamptz(6)
+  deliveredAt   DateTime?            @db.Timestamptz(6)
+  pickupNotes   String?
+  deliveryNotes String?
+  createdAt     DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime             @updatedAt @db.Timestamptz(6)
+  donation      Donation             @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  assignment    VolunteerAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+
+  @@index([donationId, status])
+}
+
+model CustodyEvent {
+  id          String           @id @default(cuid())
+  donationId  String
+  eventType   CustodyEventType
+  actorUserId String?
+  occurredAt  DateTime         @default(now()) @db.Timestamptz(6)
+  details     Json?
+  donation    Donation         @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  actor       User?            @relation("CustodyActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([donationId, occurredAt])
+}
+
+model NgoReceipt {
+  id             String       @id @default(cuid())
+  donationId     String       @unique
+  ngoId          String
+  receivedAt     DateTime     @db.Timestamptz(6)
+  receivedByName String
+  notes          String?
+  createdAt      DateTime     @default(now()) @db.Timestamptz(6)
+  donation       Donation     @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  ngo            Organization @relation(fields: [ngoId], references: [id], onDelete: Restrict)
+
+  @@index([ngoId, receivedAt])
+}
+
+model BeneficiaryGroup {
+  id            String         @id @default(cuid())
+  ngoId         String
+  name          String
+  description   String?
+  estimatedSize Int?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(6)
+  ngo           Organization   @relation(fields: [ngoId], references: [id], onDelete: Restrict)
+  distributions Distribution[]
+
+  @@unique([ngoId, name])
+}
+
+model Distribution {
+  id                  String           @id @default(cuid())
+  donationId          String
+  beneficiaryGroupId  String
+  servingsDistributed Int
+  distributedAt       DateTime         @db.Timestamptz(6)
+  notes               String?
+  createdAt           DateTime         @default(now()) @db.Timestamptz(6)
+  donation            Donation         @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  beneficiaryGroup    BeneficiaryGroup @relation(fields: [beneficiaryGroupId], references: [id], onDelete: Restrict)
+
+  @@index([beneficiaryGroupId, distributedAt])
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  channel   NotificationChannel
+  status    NotificationStatus  @default(pending)
+  subject   String
+  body      String
+  readAt    DateTime?           @db.Timestamptz(6)
+  sentAt    DateTime?           @db.Timestamptz(6)
+  createdAt DateTime            @default(now()) @db.Timestamptz(6)
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  entityType  String
+  entityId    String
+  action      String
+  metadata    Json?
+  occurredAt  DateTime @default(now()) @db.Timestamptz(6)
+  actor       User?    @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, occurredAt])
+  @@index([actorUserId, occurredAt])
+}
