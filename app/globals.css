@@ -13,6 +13,11 @@
   --muted-foreground: #5f6d63;
   --border: #ded9ca;
   --ring: #1f5c3a;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --success: #18794e;
+  --warning: #b54708;
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -28,10 +33,21 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --radius-card: var(--radius);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
 body {
@@ -39,4 +55,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
 }

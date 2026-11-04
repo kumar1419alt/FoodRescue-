@@ -1,0 +1,2 @@
+import type { ReactNode } from "react";
+export function FormField({ label, htmlFor, hint, error, children }: { label: string; htmlFor: string; hint?: string; error?: string; children: ReactNode }) { return <div className="space-y-2"><label className="text-sm font-semibold" htmlFor={htmlFor}>{label}</label>{children}{error ? <p className="text-sm text-destructive" id={`${htmlFor}-error`}>{error}</p> : hint ? <p className="text-sm text-muted-foreground" id={`${htmlFor}-hint`}>{hint}</p> : null}</div>; }

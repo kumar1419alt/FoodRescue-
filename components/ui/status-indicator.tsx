@@ -1,0 +1,2 @@
+import { cn } from "@/lib/utils";
+export function StatusIndicator({ label, tone = "neutral" }: { label: string; tone?: "success" | "warning" | "danger" | "neutral" }) { const colors = { success: "bg-success", warning: "bg-warning", danger: "bg-destructive", neutral: "bg-muted-foreground" }; return <span className="inline-flex items-center gap-2 text-sm font-medium"><span className={cn("size-2 rounded-full", colors[tone])} />{label}</span>; }
