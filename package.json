@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --pool=forks",
     "test:db": "tsx prisma/assert-test-database.ts && vitest run tests/database.integration.test.ts",
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
