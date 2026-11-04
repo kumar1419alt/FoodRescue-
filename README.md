@@ -20,3 +20,7 @@ npm run build
 ## Repository workflow
 
 Development occurs on dedicated feature branches. `main` remains the stable branch and is merged only with approval.
+
+## UI system
+
+See [UI_SYSTEM.md](UI_SYSTEM.md) for the brand tokens, accessibility conventions, responsive layout guidance, and reusable component boundaries.

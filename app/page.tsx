@@ -1,12 +1,19 @@
-import { ArrowRight, Building2, ShieldCheck, Truck } from "lucide-react";
+import { ArrowRight, Building2, HandHeart, ShieldCheck, Truck } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { DashboardPreview } from "@/components/layout/dashboard-preview";
 
 const principles = [
   { icon: Building2, title: "Local partners", description: "Connect verified donors and NGOs around a shared neighborhood." },
   { icon: ShieldCheck, title: "Safety first", description: "Build every hand-off around clear food safety checks and accountability." },
   { icon: Truck, title: "Traceable impact", description: "Follow each donation from surplus food to community distribution." },
+];
+
+const roles = [
+  { icon: Building2, name: "Donors", description: "Restaurants, hotels, event organizers, marriage halls, and households can prepare safe surplus for matching." },
+  { icon: HandHeart, name: "NGOs", description: "Verified organizations can review suitable donations and coordinate responsible distribution." },
+  { icon: Truck, name: "Volunteers", description: "Assigned people can support documented collection, inspection, and delivery hand-offs." },
 ];
 
 export default function Home() {
@@ -39,6 +46,10 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <section className="bg-card px-6 py-20 lg:px-8" id="roles">
+        <div className="mx-auto max-w-7xl"><SectionHeading eyebrow="Made for local action" title="Every role has a clear place in the rescue." description="FoodRescue connects organizations and people around one accountable path from safe surplus to community distribution." /><div className="mt-10 grid gap-5 md:grid-cols-3">{roles.map(({ icon: Icon, name, description }) => <article className="rounded-xl border border-border p-6" key={name}><Icon aria-hidden="true" className="size-6 text-accent" /><h3 className="mt-4 text-xl font-bold">{name}</h3><p className="mt-2 leading-7 text-muted-foreground">{description}</p></article>)}</div></div>
+      </section>
+      <DashboardPreview />
       <section className="border-t border-border bg-muted px-6 py-20 lg:px-8" id="partners">
         <div className="mx-auto max-w-7xl">
           <SectionHeading eyebrow="Built for collaboration" title="A shared system for the people who move food forward." description="Donor, NGO, volunteer, and administrator workspaces will be introduced in later phases. This foundation makes their future workflows clear without presenting inactive account actions today." />
