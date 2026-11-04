@@ -65,11 +65,22 @@ Every material event records an immutable audit entry: actor, role, action, enti
 - `types`, `lib/validations`, `lib/constants`, `lib/services`, and `lib/data-access` create clear domain and server boundaries.
 - A future database adapter and authentication provider will be selected and integrated only in their respective phases.
 
-## Implementation phases
+## Implementation roadmap
 
-1. **Foundation:** architecture, design system, specifications, validation contracts, and public shell.
-2. **Database:** schema, migrations, repositories, transactions, and audit persistence.
-3. **Authentication:** identity, role authorization, organization verification, and protected routes.
-4. **Donation workflow:** donor creation, matching, acceptance, assignment, safety, pickup, delivery, and receipts.
-5. **NGO, volunteer, and admin operations:** dashboards, beneficiary distribution, safety controls, complaints, and reporting.
-6. **Public website and production readiness:** public content, analytics, end-to-end testing, accessibility, observability, and deployment hardening.
+The roadmap deliberately separates infrastructure from operational features so that no production workflow is presented before its safety, data, and authorization requirements exist.
+
+1. **Foundation and architecture:** establish the Next.js, TypeScript, Tailwind, shadcn-compatible UI, project structure, validation boundaries, and initial design tokens.
+2. **UI/UX system:** refine accessible responsive layouts, reusable component patterns, content hierarchy, empty/error states, and user-flow prototypes.
+3. **PostgreSQL and Prisma:** design the relational schema, Prisma models, migrations, repository adapters, transactions, and seed strategy.
+4. **Authentication and authorization:** implement secure identity, sessions, role and organization authorization, protected route groups, and verification gates.
+5. **Public website:** deliver complete public content, partner information, accessibility polish, and safe conversion paths that connect to implemented flows only.
+6. **Donor experience:** add organization onboarding, donation creation, history, updates, cancellation rules, and donor receipts.
+7. **NGO operations:** implement verification, matching review, acceptance, capacity controls, receipt acknowledgement, and distribution management.
+8. **Volunteer operations:** add assignment, collection-task views, custody hand-offs, inspection evidence, pickup confirmation, and delivery confirmation.
+9. **Admin controls:** deliver organization approval, user administration, role controls, complaint handling, audit review, and operational reporting.
+10. **Food safety:** implement food-category rules, safety checklists, expiry and temperature handling, rejection reasons, evidence retention, and escalation paths.
+11. **Pickup and delivery:** implement matching logistics, assignment constraints, route/pickup scheduling, delivery hand-off, and custody status transitions.
+12. **Beneficiary distribution:** add NGO-managed beneficiary groups, aggregate distribution records, privacy safeguards, and outcome tracking without individual beneficiary accounts.
+13. **Smart features:** introduce carefully evaluated matching recommendations, urgency prioritization, capacity-aware suggestions, and notifications with human oversight.
+14. **Rewards and analytics:** add verified donor/volunteer recognition, impact summaries, role-appropriate dashboards, and aggregate analytics.
+15. **Final testing and launch readiness:** complete unit, integration, end-to-end, security, performance, accessibility, disaster-recovery, monitoring, and deployment validation.

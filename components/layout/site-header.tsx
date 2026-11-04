@@ -1,9 +1,11 @@
 import { HeartHandshake } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
-
-const navigation = ["How it works", "For partners", "Safety"];
+const navigation = [
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#partners", label: "For partners" },
+  { href: "/#safety", label: "Safety" },
+];
 
 export function SiteHeader() {
   return (
@@ -15,12 +17,14 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Primary navigation" className="hidden items-center gap-7 md:flex">
           {navigation.map((item) => (
-            <Link className="text-sm font-medium text-muted-foreground hover:text-foreground" href="/" key={item}>
-              {item}
+            <Link className="text-sm font-medium text-muted-foreground hover:text-foreground" href={item.href} key={item.href}>
+              {item.label}
             </Link>
           ))}
         </nav>
-        <Button size="sm" variant="outline">Partner with us</Button>
+        <Link className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-background px-4 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" href="/#partners">
+          Partner with us
+        </Link>
       </div>
     </header>
   );
