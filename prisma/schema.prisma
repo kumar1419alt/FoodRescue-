@@ -131,8 +131,8 @@ model User {
   custodyEvents CustodyEvent[]         @relation("CustodyActor")
   notifications Notification[]
   auditLogs     AuditLog[]             @relation("AuditActor")
-  authAccounts  AuthAccount[]          @relation("AuthAccounts")
-  authSessions  AuthSession[]          @relation("AuthSessions")
+  authaccounts  AuthAccount[]          @relation("AuthAccounts")
+  authsessions  AuthSession[]          @relation("AuthSessions")
 }
 
 /// Better Auth's persistent credential provider records. Password hashes are
@@ -186,6 +186,21 @@ model AuthVerification {
   updatedAt  DateTime @updatedAt @db.Timestamptz(6)
 
   @@index([identifier, expiresAt])
+}
+
+/// A short-lived, server-issued record that binds a public registration request
+/// to the Better Auth user-create lifecycle. It prevents direct auth endpoint
+/// calls from bypassing FoodRescue role and NGO setup.
+model RegistrationIntent {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  role             UserRole
+  organizationName String?
+  nonceHash        String   @unique
+  expiresAt        DateTime @db.Timestamptz(6)
+  createdAt        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([expiresAt])
 }
 
 model Organization {

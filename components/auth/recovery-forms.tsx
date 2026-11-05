@@ -52,5 +52,5 @@ export function ResetPasswordForm() {
 export function VerifyEmailMessage() {
   const params = useSearchParams();
   const token = params.get("token");
-  return <div className="space-y-4"><p className="text-sm text-muted-foreground">{token ? "Your verification link is being processed securely." : "Check your inbox for a verification link. It expires after one hour."}</p><Link className="inline-flex text-sm font-semibold text-primary underline" href="/login">Continue to login</Link></div>;
+  return <div className="space-y-4"><p className="text-sm text-muted-foreground">{token ? "Open the complete verification link from your email. FoodRescue confirms verification only through the secure authentication endpoint." : "Check your inbox for a verification link. It expires after one hour."}</p><Link className="inline-flex text-sm font-semibold text-primary underline" href="/login">Continue to login</Link></div>;
 }

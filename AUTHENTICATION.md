@@ -80,7 +80,9 @@ or direct destructive migration commands against the development database.
 ## Security baseline
 
 - Auth routes are server-side and use framework-managed HTTP-only cookies.
-- Production refuses to start without `BETTER_AUTH_SECRET` or `AUTH_SECRET`.
+- Every runtime authentication request refuses service without
+  `BETTER_AUTH_SECRET` or `AUTH_SECRET`; the build-only fallback cannot
+  authenticate a request.
 - Sessions expire after seven days and are refreshed at most once per day.
 - Password resets revoke other active sessions.
 - Protected routes resolve identities server-side from the database session and
@@ -97,3 +99,11 @@ implemented. NGO self-registration creates a pending NGO organization and
 membership; it does not approve the organization. Admin accounts are never
 created through public registration and must be provisioned through a future
 audited administrative workflow.
+
+Public registration first creates a short-lived, server-only registration
+intent. A cryptographic nonce accompanies the internal Better Auth request and
+is verified in the user-create lifecycle hook. The account remains inactive
+until the role, NGO membership, verification state, and audit records are all
+committed together. Raw Better Auth sign-up calls therefore cannot bypass
+FoodRescue registration policy; any failed setup remains inactive and cannot
+create a session.

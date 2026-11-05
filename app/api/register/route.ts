@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { isPublicRegistrationRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/data-access/prisma";
+import { createRegistrationIntent } from "@/lib/auth/registration";
 import { registrationSchema } from "@/lib/validations/auth";
 
 const genericResponse = {
@@ -26,11 +27,22 @@ export async function POST(request: Request) {
   if (role === "ngo" && !organizationName) {
     return NextResponse.json({ error: "Enter your NGO name." }, { status: 400 });
   }
+  const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+  if (existingUser) return NextResponse.json(genericResponse, { status: 202 });
+
+  let nonce: string;
+  try {
+    nonce = await createRegistrationIntent(prisma, { email, role, organizationName });
+  } catch {
+    return NextResponse.json(genericResponse, { status: 202 });
+  }
+
   const authRequest = new Request(new URL("/api/auth/sign-up/email", request.url), {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: new URL(request.url).origin,
+      "x-foodrescue-registration-nonce": nonce,
     },
     body: JSON.stringify({
       name: displayName,
@@ -45,47 +57,6 @@ export async function POST(request: Request) {
     // The framework returns generic duplicate responses with verification
     // enabled. Preserve that account-enumeration protection for this route.
     return NextResponse.json(genericResponse, { status: 202 });
-  }
-
-  const payload = (await response.json()) as { user?: { id?: string } };
-  const userId = payload.user?.id;
-  if (userId) {
-    await prisma.$transaction(async (transaction) => {
-      await transaction.user.update({
-        where: { id: userId },
-        data: { role },
-      });
-      if (role === "ngo" && organizationName) {
-        const organization = await transaction.organization.create({
-          data: {
-            name: organizationName,
-            slug: `${organizationName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${userId.slice(-8)}`,
-            type: "ngo",
-            contactEmail: email,
-            members: { create: { userId, role: "ngo" } },
-            verification: { create: { status: "pending" } },
-          },
-        });
-        await transaction.auditLog.create({
-          data: {
-            actorUserId: userId,
-            entityType: "Organization",
-            entityId: organization.id,
-            action: "auth.ngo.organization.created",
-            metadata: { verificationStatus: "pending" },
-          },
-        });
-      }
-      await transaction.auditLog.create({
-        data: {
-          actorUserId: userId,
-          entityType: "User",
-          entityId: userId,
-          action: "auth.registration.created",
-          metadata: { role, organizationCreated: role === "ngo" },
-        },
-      });
-    });
   }
 
   return NextResponse.json(genericResponse, { status: 202 });
