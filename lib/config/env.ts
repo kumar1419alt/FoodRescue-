@@ -5,6 +5,8 @@ const serverEnvironmentSchema = z.object({
   DATABASE_TEST_URL: z.string().url().optional(),
   AUTH_SECRET: z.string().min(32).optional(),
   APP_URL: z.string().url().optional(),
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
+  BETTER_AUTH_URL: z.string().url().optional(),
 });
 
 /**
@@ -16,4 +18,6 @@ export const env = serverEnvironmentSchema.parse({
   DATABASE_TEST_URL: process.env.DATABASE_TEST_URL,
   AUTH_SECRET: process.env.AUTH_SECRET,
   APP_URL: process.env.APP_URL,
+  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+  BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
 });

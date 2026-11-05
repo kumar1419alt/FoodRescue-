@@ -13,6 +13,25 @@ jobs:
   verify:
     name: Verify application
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: foodrescue_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d foodrescue_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/foodrescue_dev?schema=public
+      DATABASE_TEST_URL: postgresql://postgres:postgres@localhost:5432/foodrescue_test?schema=public
+      BETTER_AUTH_SECRET: ci-only-secret-that-is-at-least-thirty-two-characters-long
+      BETTER_AUTH_URL: http://localhost:3000
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -25,11 +44,21 @@ jobs:
         run: npm ci
       - name: Generate Prisma Client
         run: npm run db:generate
+      - name: Apply development migrations
+        run: npm run db:deploy
+      - name: Create isolated test database
+        run: psql -h localhost -U postgres -d foodrescue_dev -c "CREATE DATABASE foodrescue_test"
+        env:
+          PGPASSWORD: postgres
+      - name: Apply test migrations
+        run: npm run db:test:migrate
       - name: Type check
         run: npm run typecheck
       - name: Lint
         run: npm run lint
       - name: Test
         run: npm test
+      - name: Database integration test
+        run: npm run test:db
       - name: Production build
         run: npm run build
